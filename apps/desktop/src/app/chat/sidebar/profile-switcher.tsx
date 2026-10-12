@@ -99,7 +99,7 @@ import { CreateProfileDialog } from '../../profiles/create-profile-dialog'
 import { DeleteProfileDialog } from '../../profiles/delete-profile-dialog'
 import { RenameProfileDialog } from '../../profiles/rename-profile-dialog'
 import { PROFILES_ROUTE, SETTINGS_ROUTE } from '../../routes'
-import { sessionDotClassName } from '../session-status-dot'
+import { SESSION_DOT_EMOJI_CLASS, sessionDotEmoji } from '../session-status-dot'
 
 import { ConnectionGlyph } from './connection-glyph'
 import { FleetGatewayMenuGroup } from './fleet-gateway-menu-group'
@@ -120,11 +120,15 @@ const PROFILE_DROPDOWN_THRESHOLD = 13
 
 // #91710: a profile that finished (or blocked, or is still working) while
 // another was selected carries an indicator on its rail square and dropdown
-// row. It paints the session status dot's own class for the same state, so a
+// row. It paints the session status dot's own emoji for the same state, so a
 // profile's loudest state reads the same as its sessions' dots below. The
 // `profile-status-dot` slot lets tests (and tours) find it.
 function ProfileStatusDot({ summary }: { summary: ProfileDotSummary }) {
-  return <span aria-hidden="true" className={sessionDotClassName(summary.state)} data-slot="profile-status-dot" />
+  return (
+    <span aria-hidden="true" className={SESSION_DOT_EMOJI_CLASS} data-slot="profile-status-dot">
+      {sessionDotEmoji(summary.state)}
+    </span>
+  )
 }
 
 /** The a11y/tooltip text for one square's summary — every non-zero count,

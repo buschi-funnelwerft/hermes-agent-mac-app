@@ -1,6 +1,6 @@
 import { useStore } from '@nanostores/react'
 
-import { sessionDotClassName } from '@/app/chat/session-status-dot'
+import { SESSION_DOT_EMOJI_CLASS, sessionDotEmoji } from '@/app/chat/session-status-dot'
 import { Button } from '@/components/ui/button'
 import { Codicon } from '@/components/ui/codicon'
 import {
@@ -70,16 +70,20 @@ import type { SessionStatusBucket } from '@/store/session-dot-state'
 import { $sessionsHaveCost } from '@/store/sidebar-archive'
 
 interface Option<T extends string = string> {
-  /** A status dot's full className, from the row's own vocabulary. */
-  dot?: string
+  /** A status emoji from the shared session-status vocabulary. */
+  emoji?: string
   icon?: string
   id: T
   label: string
 }
 
 function OptionGlyph({ option }: { option: Option }) {
-  if (option.dot) {
-    return <span aria-hidden="true" className={cn('shrink-0', option.dot)} />
+  if (option.emoji) {
+    return (
+      <span aria-hidden="true" className={cn(SESSION_DOT_EMOJI_CLASS, 'text-(--ui-text-tertiary)')}>
+        {option.emoji}
+      </span>
+    )
   }
 
   return option.icon ? <Codicon className="text-(--ui-text-tertiary)" name={option.icon} size="0.8125rem" /> : null
@@ -153,11 +157,11 @@ export function SidebarFilterMenu({ className }: { className?: string }) {
   ]
 
   const STATUS_FILTERS: Option<SessionStatusBucket>[] = [
-    { dot: sessionDotClassName('needs-input'), id: 'needs-input', label: f.needsInput },
-    { dot: sessionDotClassName('working'), id: 'working', label: f.working },
-    { dot: sessionDotClassName('unread'), id: 'unread', label: f.unread },
-    { dot: sessionDotClassName('draft'), id: 'draft', label: f.draft },
-    { dot: cn(sessionDotClassName('idle'), 'bg-(--ui-text-quaternary)'), id: 'idle', label: f.idle }
+    { emoji: sessionDotEmoji('needs-input'), id: 'needs-input', label: f.needsInput },
+    { emoji: sessionDotEmoji('working'), id: 'working', label: f.working },
+    { emoji: sessionDotEmoji('unread'), id: 'unread', label: f.unread },
+    { emoji: sessionDotEmoji('draft'), id: 'draft', label: f.draft },
+    { emoji: sessionDotEmoji('idle'), id: 'idle', label: f.idle }
   ]
 
   const grouping = useStore($sidebarGrouping)
