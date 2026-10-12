@@ -58,6 +58,7 @@ export const $updateApply = atom<UpdateApplyState>(IDLE)
 export const $updateChecking = atom<boolean>(false)
 export const $updateOverlayOpen = atom<boolean>(false)
 export const $updateStatus = atom<DesktopUpdateStatus | null>(null)
+export const $updateWarningRequest = atom<{ id: number; target?: UpdateTarget } | null>(null)
 
 // Client and backend are independently updatable; each keeps its own state.
 export const $backendUpdateStatus = atom<DesktopUpdateStatus | null>(null)
@@ -404,6 +405,24 @@ export function openUpdatesWindow(target: UpdateTarget = activeUpdateTarget()): 
  * An explicit `target` opts out of both: the caller is acting on one named
  * machine's status and must not fan out to the others.
  */
+let updateWarningRequestId = 0
+
+export function openUpdateWarningFor(target?: UpdateTarget): void {
+  updateWarningRequestId += 1
+  $updateWarningRequest.set({ id: updateWarningRequestId, target })
+}
+
+export function cancelUpdateWarning(): void {
+  $updateWarningRequest.set(null)
+}
+
+export function continueUpdateAfterWarning(): void {
+  const request = $updateWarningRequest.get()
+  $updateWarningRequest.set(null)
+
+  startActiveUpdate(request?.target)
+}
+
 export function startActiveUpdate(target?: UpdateTarget): void {
   if (!target && hasMultipleUpdateTargets()) {
     $updateOverlayOpen.set(true)
