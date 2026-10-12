@@ -19,7 +19,7 @@ import {
   checkBackendUpdates,
   checkUpdates,
   openUpdateOverlayFor,
-  startActiveUpdate,
+  openUpdateWarningFor,
   type UpdateApplyState,
   type UpdateTarget
 } from '@/store/updates'
@@ -268,7 +268,7 @@ function UpdateActions({ target, u, view }: UpdateActionsProps): ReactElement | 
 
   return (
     <>
-      <Button onClick={() => startActiveUpdate(target)} size="sm">
+      <Button onClick={() => openUpdateWarningFor(target)} size="sm">
         {u.updateNow}
       </Button>
       <Button onClick={() => openUpdateOverlayFor(target)} size="sm" variant="textStrong">

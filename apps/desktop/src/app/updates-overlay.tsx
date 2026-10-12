@@ -1,5 +1,5 @@
 import { useStore } from '@nanostores/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { SETTINGS_ROUTE } from '@/app/routes'
 import { SETTING_IDS } from '@/app/settings/settings-manifest'
@@ -42,11 +42,15 @@ import {
   $updateOverlayOpen,
   $updateOverlayTarget,
   $updateStatus,
+  $updateWarningRequest,
   applyBackendUpdate,
   applyUpdates,
+  cancelUpdateWarning,
   checkBackendUpdates,
   checkUpdates,
+  continueUpdateAfterWarning,
   dismissDiscontinuedNotice,
+  openUpdateWarningFor,
   resetUpdateApplyState,
   setUpdateOverlayOpen,
   sourceUpdateChannel,
@@ -114,61 +118,97 @@ export function UpdatesOverlay() {
   }
 
   const handleInstall = () => {
-    void install()
+    openUpdateWarningFor(target)
   }
 
   return (
-    <Dialog onOpenChange={handleClose} open={open}>
-      {/* This dialog has no inputs, so Radix's default autofocus would land on
-          the close button and trigger its tooltip immediately on open. */}
+    <>
+      <UpdateWarningDialog />
+      <Dialog onOpenChange={handleClose} open={open}>
+        {/* This dialog has no inputs, so Radix's default autofocus would land on
+            the close button and trigger its tooltip immediately on open. */}
+        <DialogContent
+          bodyClassName="overflow-hidden p-0 gap-0"
+          className="max-w-sm"
+          onOpenAutoFocus={preventCloseButtonAutoFocus}
+          showCloseButton={phase !== 'applying'}
+        >
+          {phase === 'applying' && (
+            <ApplyingView apply={apply} isBackend={isBackend} statusMechanism={status?.mechanism} />
+          )}
+
+          {phase === 'manual' && (
+            <ManualView
+              command={apply.command ?? null}
+              isBackend={isBackend}
+              message={apply.message}
+              onDone={() => handleClose(false)}
+            />
+          )}
+
+          {phase === 'guiSkew' && <GuiSkewView message={apply.message} onDone={() => handleClose(false)} />}
+
+          {phase === 'error' ? (
+            <ErrorView message={apply.message} onDismiss={() => handleClose(false)} onRetry={handleInstall} />
+          ) : null}
+
+          {phase === 'idle' && !isBackend && status?.retirement?.state === 'discontinued' && (
+            <DiscontinuedNotice
+              onDismiss={() => {
+                dismissDiscontinuedNotice(status.retirement!)
+                handleClose(false)
+              }}
+              retirement={status.retirement}
+            />
+          )}
+          {phase === 'idle' && (isBackend || !status?.retirement) && (
+            <IdleView
+              behind={behind}
+              checking={checking}
+              commits={status?.commits ?? []}
+              onInstall={handleInstall}
+              onLater={() => handleClose(false)}
+              onRetryCheck={() => void check()}
+              status={status}
+              target={target}
+              updateAvailable={updateAvailable}
+              version={desktopVersion}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
+  )
+}
+
+const UPDATE_WARNING_TEXT =
+  'Stop! Um ein Update anzuspielen, gehe in eine neue Session und rufe den Skill hermes-desktop-mac-update auf.'
+
+function UpdateWarningDialog() {
+  const request = useStore($updateWarningRequest)
+  const cancelRef = useRef<HTMLButtonElement>(null)
+
+  return (
+    <Dialog onOpenChange={open => !open && cancelUpdateWarning()} open={request !== null}>
       <DialogContent
-        bodyClassName="overflow-hidden p-0 gap-0"
-        className="max-w-sm"
-        onOpenAutoFocus={preventCloseButtonAutoFocus}
-        showCloseButton={phase !== 'applying'}
+        aria-label="Update warning"
+        className="max-w-md"
+        onOpenAutoFocus={event => {
+          event.preventDefault()
+          cancelRef.current?.focus()
+        }}
+        role="alertdialog"
       >
-        {phase === 'applying' && (
-          <ApplyingView apply={apply} isBackend={isBackend} statusMechanism={status?.mechanism} />
-        )}
-
-        {phase === 'manual' && (
-          <ManualView
-            command={apply.command ?? null}
-            isBackend={isBackend}
-            message={apply.message}
-            onDone={() => handleClose(false)}
-          />
-        )}
-
-        {phase === 'guiSkew' && <GuiSkewView message={apply.message} onDone={() => handleClose(false)} />}
-
-        {phase === 'error' ? (
-          <ErrorView message={apply.message} onDismiss={() => handleClose(false)} onRetry={handleInstall} />
-        ) : null}
-
-        {phase === 'idle' && !isBackend && status?.retirement?.state === 'discontinued' && (
-          <DiscontinuedNotice
-            onDismiss={() => {
-              dismissDiscontinuedNotice(status.retirement!)
-              handleClose(false)
-            }}
-            retirement={status.retirement}
-          />
-        )}
-        {phase === 'idle' && (isBackend || !status?.retirement) && (
-          <IdleView
-            behind={behind}
-            checking={checking}
-            commits={status?.commits ?? []}
-            onInstall={handleInstall}
-            onLater={() => handleClose(false)}
-            onRetryCheck={() => void check()}
-            status={status}
-            target={target}
-            updateAvailable={updateAvailable}
-            version={desktopVersion}
-          />
-        )}
+        <DialogTitle className="sr-only">Update warning</DialogTitle>
+        <DialogDescription className="text-sm leading-5">{UPDATE_WARNING_TEXT}</DialogDescription>
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <Button onClick={cancelUpdateWarning} ref={cancelRef} type="button" variant="secondary">
+            Abbrechen
+          </Button>
+          <Button onClick={continueUpdateAfterWarning} type="button">
+            Trotzdem aktualisieren
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   )
