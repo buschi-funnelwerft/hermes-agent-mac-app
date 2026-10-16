@@ -92,24 +92,26 @@
   // a key, and as defaults for the get*() helpers below so callers running
   // outside any React component (where there's no `t`) still get sane text.
   const FALLBACK_COLUMN_LABEL = {
-    triage: "Triage",
-    todo: "Todo",
-    ready: "Ready",
-    running: "In Progress",
-    blocked: "Blocked",
-    review: "Review",
-    done: "Done",
-    archived: "Archived",
+    triage: "Triage – nicht nutzen",
+    todo: "Backlog",
+    scheduled: "Geplant",
+    ready: "Nächste Aufgabe",
+    running: "In Bearbeitung",
+    blocked: "Warten auf",
+    review: "Prüfung",
+    done: "Fertig",
+    archived: "Archiviert",
   };
   const FALLBACK_COLUMN_HELP = {
-    triage: "Raw ideas — a specifier will flesh out the spec",
-    todo: "Waiting on dependencies or unassigned",
-    ready: "Dependencies satisfied; assign a profile to dispatch",
-    running: "Claimed by a worker — in-flight",
-    blocked: "Worker asked for human input",
-    review: "Implementation complete — awaiting review",
-    done: "Completed",
-    archived: "Archived",
+    triage: "Nicht nutzen – ein Agent würde die Karte umschreiben.",
+    todo: "Gesammelte Aufgaben, noch nicht dran.",
+    scheduled: "Wartet auf einen festen Zeitpunkt.",
+    ready: "Als Nächstes in einer Claude-Code-Session abarbeiten.",
+    running: "Eine Claude-Code-Session arbeitet daran und setzt den Status selbst.",
+    blocked: "Wartet auf jemanden oder etwas – Grund steht auf der Karte.",
+    review: "Erledigt, wartet auf Prüfung.",
+    done: "Abgeschlossen.",
+    archived: "Aus der Standardansicht ausgeblendet.",
   };
   const FALLBACK_DESTRUCTIVE = {
     done: "Mark this task as done? The worker's claim is released and dependent children become ready.",
