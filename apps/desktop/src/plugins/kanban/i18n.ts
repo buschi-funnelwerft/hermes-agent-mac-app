@@ -224,7 +224,7 @@ type KanbanMessages = {
   }
 }
 
-export const en: KanbanMessages = {
+const enBase: KanbanMessages = {
   nav: 'Kanban',
   openBoard: 'Kanban: Open board',
   newTaskCommand: 'Kanban: New task',
@@ -452,7 +452,7 @@ export const en: KanbanMessages = {
   }
 }
 
-const ja: KanbanMessages = {
+const jaBase: KanbanMessages = {
   nav: 'カンバン',
   openBoard: 'カンバン: ボードを開く',
   newTaskCommand: 'カンバン: 新しいタスク',
@@ -679,7 +679,7 @@ const ja: KanbanMessages = {
   }
 }
 
-const zh: KanbanMessages = {
+const zhBase: KanbanMessages = {
   nav: '看板',
   openBoard: '看板：打开面板',
   newTaskCommand: '看板：新建任务',
@@ -903,7 +903,7 @@ const zh: KanbanMessages = {
   }
 }
 
-const zhHant: KanbanMessages = {
+const zhHantBase: KanbanMessages = {
   nav: '看板',
   openBoard: '看板：開啟面板',
   newTaskCommand: '看板：新增任務',
@@ -1126,6 +1126,30 @@ const zhHant: KanbanMessages = {
     artifacts: (n: number) => `${n} 個產物`
   }
 }
+
+// Karstens passives Board: deutsche, eigene Spaltennamen und Hinweis —
+// gelten in jeder Sprache (werden unten über alle Locales gelegt).
+export const PASSIVE_BOARD_COLUMNS: KanbanMessages['col'] = {
+  triage: { label: 'Triage – nicht nutzen', help: 'Nicht nutzen – ein Agent würde die Karte umschreiben.' },
+  todo: { label: 'Backlog', help: 'Gesammelte Aufgaben, noch nicht dran.' },
+  scheduled: { label: 'Geplant', help: 'Wartet auf einen festen Zeitpunkt.' },
+  ready: { label: 'Nächste Aufgabe', help: 'Als Nächstes in einer Claude-Code-Session abarbeiten.' },
+  running: { label: 'In Bearbeitung', help: 'Eine Claude-Code-Session arbeitet daran und setzt den Status selbst.' },
+  blocked: { label: 'Warten auf', help: 'Wartet auf jemanden oder etwas – Grund steht auf der Karte.' },
+  review: { label: 'Prüfung', help: 'Erledigt, wartet auf Prüfung.' },
+  done: { label: 'Fertig', help: 'Abgeschlossen.' },
+  archived: { label: 'Archiviert', help: 'Aus der Standardansicht ausgeblendet.' }
+}
+
+export const PASSIVE_BOARD_INTRO =
+  'Dieses Board ist passiv: Karten haben keinen Assignee, kein Agent startet sie von selbst. Karsten arbeitet sie in Claude-Code-Sessions ab, die Session setzt den Status selbst. Backlog: gesammelt. Nächste Aufgabe: kommt als Nächstes dran. In Bearbeitung: eine Session arbeitet daran. Warten auf: hängt an jemandem oder etwas. Prüfung, dann Fertig. Triage nicht nutzen – dort schreibt ein Agent die Karte um.'
+
+const passive = (m: KanbanMessages): KanbanMessages => ({ ...m, col: PASSIVE_BOARD_COLUMNS, introBody: PASSIVE_BOARD_INTRO })
+
+export const en = passive(enBase)
+const ja = passive(jaBase)
+const zh = passive(zhBase)
+const zhHant = passive(zhHantBase)
 
 /** Registered via `ctx.i18n.register` at plugin load (disposer tracked). */
 export const KANBAN_LOCALES: PluginLocaleBundles = { en, ja, zh, 'zh-hant': zhHant }
